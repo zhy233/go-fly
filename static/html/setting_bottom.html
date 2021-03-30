@@ -7,6 +7,7 @@
         el: '#app',
         delimiters:["<{","}>"],
         data: {
+            iframeUrl:"/setting_statistics",
             fullscreenLoading:false,
             openIndex:[1],
             account: {
@@ -67,6 +68,7 @@
                 role_id:"",
             },
             roleList:[],
+            configList:[],
             roleDialog:false,
             noticeList:[],
             welcomeDialog:false,
@@ -81,7 +83,25 @@
                 path:"",
             },
             statistics:{},
+            pageindex: {
+                title_cn: "",
+                title_en: "",
+                keywords_cn: "",
+                keywords_en: "",
+                desc_cn: "",
+                desc_en: "",
+                css_js: "",
+                html_cn: "",
+                html_en: "",
+            },
+            modifyPass:{
+                old_pass:"",
+                new_pass:"",
+                confirm_new_pass:""
+            },
+            avatarUrl:"",
         },
+
         methods: {
             //提交表单
             setAccount(formName){
@@ -144,7 +164,8 @@
             },
             //跳转
             openUrl(url){
-                window.location.href=url;
+                //window.location.href=url;
+                this.iframeUrl=url;
             },
             //展示提示
             showNotice(){
@@ -185,7 +206,7 @@
                         _this.roleList=result;
                     });
                 }
-                if(ACTION=="setting"){
+                if(ACTION=="setting_statistics"){
                     this.sendAjax("/statistics","get",{},function(result) {
                         _this.statistics = result;
                     });
@@ -198,6 +219,21 @@
                 if(ACTION=="setting_ipblack"){
                     this.sendAjax("/ipblacks_all","get",{},function(result){
                         _this.ipblackList=result.list;
+                    });
+                }
+                if(ACTION=="setting_config"){
+                    this.sendAjax("/configs","get",{},function(result){
+                        _this.configList=result;
+                    });
+                }
+                if(ACTION=="setting_pageindex"){
+                    this.sendAjax("/about","get",{},function(result){
+                        _this.pageindex=result;
+                    });
+                }
+                if(ACTION=="setting_avator"){
+                    this.sendAjax("/kefuinfo","get",{},function(result){
+                        _this.avatarUrl=result.avator;
                     });
                 }
             },
@@ -327,6 +363,24 @@
                 this.roleForm.path=path
                 this.roleDialog=true;
             },
+            //设置配置项
+            setConfigItem(key,value){
+                let _this=this;
+                this.sendAjax("/config","POST",{key:key,value:value},function(result){
+                    _this.sendAjax("/configs","get",{},function(result){
+                        _this.configList=result;
+                    });
+                });
+            },
+            //设置配置项
+            setWelcomeItem(id,content){
+                let _this=this;
+                this.sendAjax("/notice_save","POST",{id:id,content:content},function(result){
+                    _this.sendAjax("/notices","get",{},function(result){
+                        _this.noticeList=result;
+                    });
+                });
+            },
             //提交角色表单
             submitRoleForm(formName){
                 let _this=this;
@@ -347,6 +401,55 @@
                     }
                 });
             },
+            //提交首页表单
+            setPageIndex(){
+                let _this=this;
+                this.sendAjax("/about","POST",this.pageindex,function(result){
+                    _this.$message({
+                        message: "编辑成功",
+                        type: 'success'
+                    });
+                });
+            },
+            //修改密码
+            setModifyPass(){
+                let _this=this;
+                this.sendAjax("/modifypass","POST",_this.modifyPass,function(result){
+                    _this.$message({
+                        message: "修改成功",
+                        type: 'success'
+                    });
+                    _this.modifyPass.new_pass=_this.modifyPass.old_pass=_this.modifyPass.confirm_new_pass=""
+                });
+            },
+            //修改密码
+            setModifyAvatar(){
+                let _this=this;
+                this.sendAjax("/modifyavator","POST",{avator:_this.avatarUrl},function(result){
+                    _this.$message({
+                        message: "修改成功",
+                        type: 'success'
+                    });
+                });
+            },
+            handleAvatarSuccess(res, file) {
+                console.log(res,file);
+                if(res.code!=200){
+                    _this.$message({
+                        message: res.msg,
+                        type: 'error'
+                    });
+                    return;
+                }
+                this.avatarUrl = '/'+res.result.path;
+            },
+            beforeAvatarUpload(file) {
+                var isLt2M = file.size / 1024 / 1024 < 1;
+                if (!isLt2M) {
+                    this.$message.error('上传头像图片大小不能超过 1MB!');
+                }
+                return isLt2M;
+            },
             //生成部署js
             createDeployJs(){
                 let domain=window.location.host;
@@ -354,6 +457,22 @@
                     '    var GOFLY_KEFU_ID="'+this.kefuForm.name+'";\n' +
                     '    <\/script>\n'+
                     ' <script type="text/javascript" src="http://'+domain+'/webjs"><\/script>', '网页部署');
+            },
+            GetRequest() {
+                var str = location.href
+                var num = str.indexOf("#");
+                if(num <0){
+                    return "";
+                }
+                str = str.substr(num + 1);
+                return str;
+            },
+        },
+
+        mounted:function(){
+            var urlParam=this.GetRequest();
+            if(urlParam!=""){
+                this.iframeUrl=urlParam;
             }
         },
         created: function () {

@@ -13,6 +13,7 @@ import (
 )
 
 const PageSize = 20
+
 func GetFolders(c *gin.Context) {
 	fid := c.Query("fid")
 	currentPage, _ := strconv.Atoi(c.Query("page"))
@@ -44,9 +45,9 @@ func GetFolders(c *gin.Context) {
 	result["fid"] = fid
 
 	c.JSON(200, gin.H{
-		"code": 200,
-		"msg":  "ok",
-		"result":result,
+		"code":   200,
+		"msg":    "ok",
+		"result": result,
 	})
 }
 func GetFolderList(c *gin.Context) {
@@ -64,11 +65,12 @@ func GetFolderList(c *gin.Context) {
 	result["fid"] = fid
 
 	c.JSON(200, gin.H{
-		"code": 200,
-		"msg":  "ok",
-		"result":result,
+		"code":   200,
+		"msg":    "ok",
+		"result": result,
 	})
 }
+
 //输出列表
 func ActionFolder(w http.ResponseWriter, r *http.Request) {
 	fid := tools.GetUrlArg(r, "fid")
@@ -249,7 +251,7 @@ func FolderSend(w http.ResponseWriter, r *http.Request) {
 	smtpBody := sendData.Body
 	smtpPass := mailServer.Password
 	smtpSubject := sendData.Subject
-	err = tools.Send(smtpServer, smtpFrom, smtpPass, smtpTo, smtpSubject, smtpBody)
+	err = tools.SendSmtp(smtpServer, smtpFrom, smtpPass, smtpTo, smtpSubject, smtpBody)
 	if err != nil {
 		msg, _ := json.Marshal(tools.JsonResult{Code: 400, Msg: err.Error()})
 		w.Write(msg)

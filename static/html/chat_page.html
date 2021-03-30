@@ -2,46 +2,50 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="keywords" content="开源客服系统,golang在线客服,免费客服系统,go语言在线聊天工具,gofly,GOFLY客服系统"/>
+    <meta name="description" content="golang开发的开源免费客服系统,可独立部署客服系统,支持文字/表情/图片/文件发送,支持快捷回复,支持IP黑名单,展示访客信息,后台权限控制"/>
     <meta name="author" content="陶士涵">
-    <title>GO-FLY咨询页</title>
+    <title>GO语言开源客服系统-GOFLY</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.13.1/lib/theme-chalk/index.css">
     <script src="/static/js/functions.js?v=0.1.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/element-ui@2.13.1/lib/index.js"></script>
+    <script src="/static/js/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/css/common.css?v=0.1.3" />
-    <style>
-        html,
-        body {
-            height: 100%;
-            background: #fff;
-        }
-    </style>
-
+    <link rel="stylesheet" href="/static/css/front.css?v=1.0.0" />
+    <link rel="stylesheet" href="/static/css/common.css?v=1.0.0" />
 </head>
 <body>
 <div id="app"  class="chatCenter">
     <template>
         <!--客服代码-->
-        <div class="chatContext">
+        <div class="chatContext chatVisitorPage">
             <div class="chatBox">
                 <el-alert
-                        style="margin-bottom: 10px;font-size: 12px;"
-                        title="公告 : 访客您好，欢迎star fork github https://github.com/taoshihan1991/go-fly ，感谢您的支持。"
-                        type="success">
-                </el-alert>
-                <el-alert
-                        style="margin-bottom: 10px;"
+                        style="margin:10px 0px;width: 100%"
                         :title="chatTitle"
                         :closable="false"
                         type="success">
                 </el-alert>
+                <div class="el-alert el-alert--info is-center is-light el-alert__title" v-show="msgListNum>1" v-on:click="getMesssagesByVisitorId(true)"><i class="el-icon-info" ></i>&nbsp;<{flyLang['moremessage']}></div>
+
+                <el-row :gutter="2" v-show="replys.length>0">
+                    <el-col :span="3"><el-avatar shape="square" :size="36" :src="noticeAvatar"></el-avatar></el-col>
+                    <el-col :span="21">
+                        <div class="chatUser"><{noticeName}></div>
+                        <div class="chatContent visitorReply" >
+                            <div v-for="reply in replys">
+                                <div class="visitorReplyTitle"><{reply.group_name}></div>
+                                <div v-on:click="sendReply(item.item_name)" class="visitorReplyContent" v-for="item in reply.items"><{item.item_name}></div>
+                            </div>
+                        </div>
+                    </el-col>
+                    <div class="clear"></div>
+                </el-row>
+
                 <el-row :gutter="2" v-for="v in msgList" v-bind:class="{'chatBoxMe': v.is_kefu==true}">
                     <div class="chatTime" v-bind:class="{'chatTimeHide': v.show_time==false}"><{v.time}></div>
-                    <el-col :span="3"><el-avatar :src="v.avator"></el-avatar></el-col>
+                    <el-col :span="3"><el-avatar shape="square" :size="36" :src="v.avator"></el-avatar></el-col>
                     <el-col :span="21">
                         <div class="chatUser"><{v.name}></div>
                         <div class="chatContent" v-html="v.content"></div>
@@ -54,9 +58,10 @@
             <div class="iconBtns">
                 <div class="faceBtn visitorFaceBtn"></div>
                 <div class="imageBtn visitorImageBtn" id="uploadImg" v-on:click="uploadImg('/uploadimg')"></div>
+                <div class="folderBtn visitorFolderBtn" id="uploadFile" v-on:click="uploadFile('/uploadfile')"></div>
                 <div class="clear"></div>
             </div>
-            <el-input type="textarea" class="chatArea" v-model="messageContent" v-on:keyup.enter.native="chatToUser"></el-input>
+            <el-input type="textarea" @focus="textareaFocus" @blur="textareaBlur" class="chatArea" v-model="messageContent"  @keyup.native="inputNextText" v-on:keyup.enter.native="chatToUser" :placeholder="flyLang.textarea"></el-input>
             <div class="faceBox visitorFaceBox">
                 <ul class="faceBoxList">
                     <li v-on:click="faceIconClick(i)" class="faceIcon" v-for="(v,i) in face"  :title="v.name"><img :src=v.path></li>
@@ -64,21 +69,28 @@
                 <div class="clear"></div>
             </div>
             <div class="btnArea">
-                <el-button type="primary" class="chatBoxSendBtn" size="small" v-on:click="chatToUser">{{.SendBtn}}</el-button>
+                <el-button :disabled="sendDisabled||messageContent==''" type="primary" class="chatBoxSendBtn" size="small" v-on:click="chatToUser"><{flyLang.sent}></el-button>
             </div>
             <div class="footContact clear">
-                <a href="https://github.com/taoshihan1991/go-fly" target="_blank">GO-FLY0.2.2客服陶士涵提供技术支持</a>
+                <a href="https://github.com/taoshihan1991/go-fly" target="_blank"><{flyLang.copyright}></a>
             </div>
         </div>
         <!--//客服代码-->
+        <audio id="chatMessageAudio">
+            <source id="chatMessageAudioSource"  />
+        </audio>
+        <audio id="chatMessageSendAudio">
+            <source id="chatMessageSendAudioSource"  />
+        </audio>
     </template>
 </div>
 </body>
-<script src="//pv.sohu.com/cityjson?ie=utf-8"></script>
 <script src="https://cdn.bootcss.com/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
 <script>
     var KEFU_ID='{{.KEFU_ID}}';
     var REFER='{{.Refer}}';
+    var LANG=checkLang();
 </script>
-<script src="/static/js/chat-page.js?v=0.2.2"></script>
+<script src="/static/js/chat-lang.js?v=0.3.7"></script>
+<script src="/static/js/chat-page.js?v=0.3.7"></script>
 </html>

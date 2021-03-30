@@ -7,27 +7,29 @@ import (
 	"io/ioutil"
 	"os"
 )
-var(
-	PageSize uint=10
-	VisitorPageSize uint=8
-	Version = "0.1.2"
-	GoflyConfig *Config
+
+var (
+	PageSize        uint    = 10
+	VisitorPageSize uint    = 8
+	Version                 = "0.1.2"
+	VisitorExpire   float64 = 600
+	GoflyConfig     *Config
 )
+
 const Dir = "config/"
 const AccountConf = Dir + "account.json"
 const MysqlConf = Dir + "mysql.json"
 const MailConf = Dir + "mail.json"
-const LangConf=Dir+"language.json"
 const MainConf = Dir + "config.json"
-const WeixinToken=""
-const ServerJiang=""
-func init(){
+
+func init() {
 	//配置文件
-	GoflyConfig=CreateConfig()
+	GoflyConfig = CreateConfig()
 }
-type Mysql struct{
-	Server string
-	Port string
+
+type Mysql struct {
+	Server   string
+	Port     string
 	Database string
 	Username string
 	Password string
@@ -36,14 +38,15 @@ type MailServer struct {
 	Server, Email, Password string
 }
 type Config struct {
-	Upload string
+	Upload            string
 	NoticeServerJiang bool
 }
-func CreateConfig()*Config{
+
+func CreateConfig() *Config {
 	var configObj Config
-	c:=&Config{
-		Upload: "static/upload/",
-		NoticeServerJiang:false,
+	c := &Config{
+		Upload:            "static/upload/",
+		NoticeServerJiang: false,
 	}
 	isExist, _ := tools.IsFileExist(MainConf)
 	if !isExist {
