@@ -173,6 +173,8 @@ github.com/swaggo/gin-swagger v1.2.0 h1:YskZXEiv51fjOMTsXrOetAjrMDfFaXD79PEoQBOe
 github.com/swaggo/gin-swagger v1.2.0/go.mod h1:qlH2+W7zXGZkczuL+r2nEBR2JTT+/lX05Nn6vPhc7OI=
 github.com/swaggo/swag v1.5.1 h1:2Agm8I4K5qb00620mHq0VJ05/KT4FtmALPIcQR9lEZM=
 github.com/swaggo/swag v1.5.1/go.mod h1:1Bl9F/ZBpVWh22nY0zmYyASPO1lI/zIwRDrpZU+tv8Y=
+github.com/taoshihan1991/imaptool v0.2.1-alpha h1:dbBYKyAS+ZOR+xgfWcKWWqrP1Zja7jq2SnXElFPuKOY=
+github.com/taoshihan1991/imaptool v0.2.1-alpha/go.mod h1:RA6s6GThhgsYBZi6dT3C0ND96utdKpg4ku0tuQB2+pk=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go v1.1.5-pre/go.mod h1:FwP/aQVg39TXzItUBMwnWp9T9gPQnXw4Poh4/oBQZ/0=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
